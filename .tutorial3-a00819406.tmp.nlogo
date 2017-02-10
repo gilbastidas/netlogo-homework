@@ -1,28 +1,42 @@
 breed[asians asian]
 breed[africans african]
 
+asians-own [player]
+africans-own [player]
 globals [
-  target-x target-y
+  target-x target-y finish
 ];location of center of circle
 
 turtles-own [energy]
 
 to go
-  if ticks >= 500 [ stop ]
+  ;if ticks >= 500 [ stop ]
   move-turtles
   tick
 end
 
 to move-turtles
-    if all? turtles [xcor >= target-x]
-    [ stop ]
-    ask asians
-    [ wiggle
-      correct-path
-      if (xcor > (target-x - 5 ))
-      [ facexy target-x target-y ]
-      if xcor < target-x
-      [ fd 1 ]]
+    ;if all? turtles [xcor >= target-x]
+    ;[ stop ]
+  ask asians with [player = 1]
+    [
+      ifelse (not (patch-here = patch target-x target-y))
+      [ facexy target-x target-y
+        fd 0.1][
+        set finish 1
+        ]
+    ]
+  if (finish = 1) [
+    set finish 0
+    ;Tengo que ver quien no ha llegado y matarla
+    ;cambiar el player que tenia 1 a 0 (identificar la tortuga, con el with) el with filtra dentro de un agentset
+    ;una vez que ya se cual llego y ya mate a la otra y ya se reseteo el player 0
+    ;cambiar el punto y seleccionar los nuevos jugadores
+    ask one-of asians [set player 1]
+    ask one-of africans [set player 1]
+  ]
+
+  ;puedo checar si finish para contar las tortugas y terminar el juego count asians o similar si alguno es 0
 end
 
 
@@ -31,6 +45,9 @@ to setup
   setup-patches
   setup-target
   setup-turtles
+  ask one-of asians [set player 1]
+  ask one-of africans [set player 1]
+  set finish 0
   reset-ticks
 end
 
@@ -59,29 +76,15 @@ end
 
 to setup-turtles
   create-africans number
-  create-asians 1
-  ;[ set color 11 ]
-  create-asians (number - 1)
-  [set heading 90]
+  create-asians number
   set-default-shape africans "ant"
   set-default-shape asians "ant 2"
   ask asians [ setxy random-xcor random-ycor set color 17]
   ask africans [ setxy random-xcor random-ycor set color 108]
 end
 
-to wiggle [angle]
-  rt random-float angle
-  lt random-float angle
-end
 
-to correct-path
-  ifelse heading > 180
-  [ rt 180 ]
-  [ if patch-at 0 -8 = nobody
-    [ rt 100 ]
-  if patch-at 0 8 = nobody
-  [ lt 100 ]]
-end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 227
@@ -97,8 +100,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-1
-1
+0
+0
 1
 -8
 8
@@ -157,9 +160,9 @@ count turtles
 
 PLOT
 21
-384
+246
 202
-534
+396
 Totals
 time
 totals
@@ -176,29 +179,14 @@ PENS
 
 SLIDER
 19
-250
+147
 198
-283
+180
 number
 number
 0
 100
-5.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-19
-295
-198
-328
-energy-from-grass
-energy-from-grass
-0
-100
-16.0
+7.0
 1
 1
 NIL
@@ -206,14 +194,14 @@ HORIZONTAL
 
 SLIDER
 20
-339
-198
-372
-birth-energy
-birth-energy
+197
+199
+230
+energy-from-grass
+energy-from-grass
 0
 100
-71.0
+16.0
 1
 1
 NIL
