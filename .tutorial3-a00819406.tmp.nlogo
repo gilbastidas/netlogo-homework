@@ -1,33 +1,15 @@
 breed[asians asian]
 breed[africans african]
 
+globals [
+  target-x target-y
+];location of center of circle
+
 turtles-own [energy]
-
-to check-death
-  ask turtles [
-    if energy <= 0 [ die ]
-  ]
-end
-
-to eat-grass
-  ask turtles [
-    if pcolor = green [
-      set pcolor black
-      set energy energy + energy-from-grass
-    ]
-    ifelse show-energy?
-    [ set label energy ]
-    [ set label "" ]
-  ]
-end
 
 to go
   if ticks >= 500 [ stop ]
   move-turtles
-  eat-grass
-  reproduce
-  check-death
-  regrow-grass
   tick
 end
 
@@ -35,56 +17,53 @@ to move-turtles
   ask turtles [
     right random 360
     forward 1
-    set energy energy - 1
-  ]
-end
-
-to regrow-grass
-  ask patches [
-    if random 100 < 3 [ set pcolor green ]
-  ]
-end
-
-to reproduce
-  ask turtles [
-    if energy > birth-energy [
-      set energy energy - birth-energy
-      hatch 1 [ set energy birth-energy ]
-    ]
+    ;set energy energy - 1
   ]
 end
 
 to setup
   clear-all
-  setup-patches
+  setup-target
   setup-turtles
   reset-ticks
 end
 
-to setup-patches
-  ask patches [ set pcolor green ]
+to setup-target
+  set target-x random-xcor
+  set target-y random-ycor
+  ; draw the target in red by stamping a circular
+  ask patch target-x target-y[
+    sprout 1 [
+      set color red
+      set shape "circle"
+      set size 1
+      stamp
+      die
+    ]
+  ]
+  ;ask patch target-x target-y [ set pcolor red ]
 end
 
 to setup-turtles
+  ask patches [set pcolor 67]
   create-africans number
   create-asians number
   set-default-shape africans "ant"
   set-default-shape asians "ant 2"
-  ask asians [ setxy random-xcor random-ycor set color red]
-  ask africans [ setxy random-xcor random-ycor set color blue]
+  ask asians [ setxy random-xcor random-ycor set color ]
+  ask africans [ setxy random-xcor random-ycor set color 108]
 end
-
 
 
 @#$#@#$#@
 GRAPHICS-WINDOW
 227
 39
-685
-498
+719
+532
 -1
 -1
-50.0
+44.0
 1
 10
 1
@@ -94,10 +73,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--4
-4
--4
-4
+-5
+5
+-5
+5
 1
 1
 1
@@ -199,7 +178,7 @@ number
 number
 0
 100
-61.0
+5.0
 1
 1
 NIL
