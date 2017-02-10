@@ -14,18 +14,31 @@ to go
 end
 
 to move-turtles
-  ask turtles [
-    right random 360
-    forward 1
-    ;set energy energy - 1
-  ]
+    if all? turtles [xcor >= target-x]
+    [ stop ]
+    ask asians
+    [ wiggle
+      correct-path
+      if (xcor > (target-x - 5 ))
+      [ facexy target-x target-y ]
+      if xcor < target-x
+      [ fd 1 ]]
 end
+
 
 to setup
   clear-all
+  setup-patches
   setup-target
   setup-turtles
   reset-ticks
+end
+
+to setup-patches
+  ask patches [set pcolor 67]
+  ask patch 5 3 [set pcolor black]
+  ask patch -5 -3 [set pcolor black]
+  ask patches with [pcolor = black] [ ask patch-at -1 1 [ set pcolor black ] ask patch-at 0 1 [ set pcolor black ] ask patch-at -1 0 [ set pcolor black ]]
 end
 
 to setup-target
@@ -34,9 +47,9 @@ to setup-target
   ; draw the target in red by stamping a circular
   ask patch target-x target-y[
     sprout 1 [
-      set color red
+      set color 14
       set shape "circle"
-      set size 1
+      set size 2
       stamp
       die
     ]
@@ -45,25 +58,39 @@ to setup-target
 end
 
 to setup-turtles
-  ask patches [set pcolor 67]
   create-africans number
-  create-asians number
+  create-asians 1
+  ;[ set color 11 ]
+  create-asians (number - 1)
+  [set heading 90]
   set-default-shape africans "ant"
   set-default-shape asians "ant 2"
-  ask asians [ setxy random-xcor random-ycor set color ]
+  ask asians [ setxy random-xcor random-ycor set color 17]
   ask africans [ setxy random-xcor random-ycor set color 108]
 end
 
+to wiggle [angle]
+  rt random-float angle
+  lt random-float angle
+end
 
+to correct-path
+  ifelse heading > 180
+  [ rt 180 ]
+  [ if patch-at 0 -8 = nobody
+    [ rt 100 ]
+  if patch-at 0 8 = nobody
+  [ lt 100 ]]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 227
 39
-719
-532
+711
+524
 -1
 -1
-44.0
+28.0
 1
 10
 1
@@ -73,10 +100,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--5
-5
--5
-5
+-8
+8
+-8
+8
 1
 1
 1
@@ -128,28 +155,6 @@ count turtles
 1
 11
 
-MONITOR
-19
-144
-199
-189
-Green Patches
-count patches with [pcolor = green]
-17
-1
-11
-
-SWITCH
-18
-204
-198
-237
-show-energy?
-show-energy?
-1
-1
--1000
-
 PLOT
 21
 384
@@ -166,8 +171,8 @@ true
 true
 "" ""
 PENS
-"turtles" 1.0 0 -16777216 true "" "plot count turtles"
-"grass" 1.0 0 -10899396 true "" "plot count patches with [pcolor = green]"
+"Asians" 1.0 0 -1604481 true "" "plot count asians"
+"Africans" 1.0 0 -5325092 true "" "plot count africans"
 
 SLIDER
 19
