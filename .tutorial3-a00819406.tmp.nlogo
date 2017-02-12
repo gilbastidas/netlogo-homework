@@ -10,15 +10,21 @@ globals [
 turtles-own [energy]
 
 to go
-  ;if ticks >= 500 [ stop ]
   move-turtles
   tick
 end
 
 to move-turtles
-    ;if all? turtles [xcor >= target-x]
-    ;[ stop ]
   ask asians with [player = 1]
+    [
+      ifelse (not (patch-here = patch target-x target-y))
+      [ facexy target-x target-y
+        fd 0.1][
+        set finish 1
+        ]
+    ]
+
+  ask africans with [player = 1]
     [
       ifelse (not (patch-here = patch target-x target-y))
       [ facexy target-x target-y
@@ -28,15 +34,19 @@ to move-turtles
     ]
   if (finish = 1) [
     set finish 0
+    ask asians with [player = 1 ] [
+      set player 0
+    ]
     ;Tengo que ver quien no ha llegado y matarla
     ;cambiar el player que tenia 1 a 0 (identificar la tortuga, con el with) el with filtra dentro de un agentset
     ;una vez que ya se cual llego y ya mate a la otra y ya se reseteo el player 0
     ;cambiar el punto y seleccionar los nuevos jugadores
-    ask one-of asians [set player 1]
-    ask one-of africans [set player 1]
+    ;ask one-of asians [set player 1]
+    ;ask one-of africans [set player 1]
   ]
 
-  ;puedo checar si finish para contar las tortugas y terminar el juego count asians o similar si alguno es 0
+
+  ;puedo checar si finish para contar las tortugas y terminar el juego count asians o similar si alguno es 0 termino
 end
 
 
@@ -59,8 +69,11 @@ to setup-patches
 end
 
 to setup-target
-  set target-x random-xcor
-  set target-y random-ycor
+
+  ask patches [
+    if pcolor != black [
+
+
   ; draw the target in red by stamping a circular
   ask patch target-x target-y[
     sprout 1 [
@@ -71,7 +84,11 @@ to setup-target
       die
     ]
   ]
-  ;ask patch target-x target-y [ set pcolor red ]
+    ]
+  ]
+
+
+
 end
 
 to setup-turtles
@@ -82,7 +99,6 @@ to setup-turtles
   ask asians [ setxy random-xcor random-ycor set color 17]
   ask africans [ setxy random-xcor random-ycor set color 108]
 end
-
 
 
 @#$#@#$#@
