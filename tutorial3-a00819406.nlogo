@@ -19,31 +19,44 @@ to move-turtles
     [
       ifelse (not (patch-here = patch target-x target-y))
       [ facexy target-x target-y
-        fd 0.1][
+        fd speed][
         set finish 1
         ]
     ]
 
   ask africans with [player = 1]
     [
-      ifelse (not (patch-here = patch target-x target-y))
-      [ facexy target-x target-y
-        fd 0.1][
-        set finish 1
+      let done? false
+      ;while [not done?]
+      ;[
+        ;if (any? (patches in-cone 3 60) with [pcolor = black])[
+         ; rt -10
+
+
+        ;]
+        ;[
+          ifelse (not (patch-here = patch target-x target-y))
+          [ facexy target-x target-y
+            fd speed][
+            set finish 1
+            set done? true
+            ]
+        if (finish = 1) [
+          set finish 0
+          ask asians with [player = 1 ] [
+            set player 0
+          ]
+          ;Tengo que ver quien no ha llegado y matarla
+          ;cambiar el player que tenia 1 a 0 (identificar la tortuga, con el with) el with filtra dentro de un agentset
+          ;una vez que ya se cual llego y ya mate a la otra y ya se reseteo el player 0
+          ;cambiar el punto y seleccionar los nuevos jugadores
+          ;ask one-of asians [set player 1]
+          ;ask one-of africans [set player 1]
         ]
+        ;]
+       ; ]
     ]
-  if (finish = 1) [
-    set finish 0
-    ask asians with [player = 1 ] [
-      set player 0
-    ]
-    ;Tengo que ver quien no ha llegado y matarla
-    ;cambiar el player que tenia 1 a 0 (identificar la tortuga, con el with) el with filtra dentro de un agentset
-    ;una vez que ya se cual llego y ya mate a la otra y ya se reseteo el player 0
-    ;cambiar el punto y seleccionar los nuevos jugadores
-    ;ask one-of asians [set player 1]
-    ;ask one-of africans [set player 1]
-  ]
+
 
 
   ;puedo checar si finish para contar las tortugas y terminar el juego count asians o similar si alguno es 0 termino
@@ -73,22 +86,19 @@ to setup-target
   set target-y random-ycor
   ask patch target-x target-y [
     if pcolor = black [
-     setup-target
+      setup-target
     ]
     ; draw the target in red by stamping a circular
-  ask patch target-x target-y[
-    sprout 1 [
-      set color 14
-      set shape "circle"
-      set size 2
-      stamp
-      die
+    ask patch target-x target-y[
+      sprout 1 [
+        set color 14
+        set shape "circle"
+        set size 1
+        stamp
+        die
+      ]
     ]
   ]
-  ]
-
-
-
 end
 
 to setup-turtles
@@ -96,11 +106,39 @@ to setup-turtles
   create-asians number
   set-default-shape africans "ant"
   set-default-shape asians "ant 2"
-  ask asians [ setxy random-xcor random-ycor set color 17]
-  ask africans [ setxy random-xcor random-ycor set color 108]
+
+  ask asians [
+    let coor-x random-xcor
+    let coor-y random-ycor
+    let done? false
+    while [not done?]
+    [
+      ifelse ([pcolor] of patch coor-x coor-y = black) [
+        set coor-x random-xcor
+        set coor-y random-ycor
+      ][
+        setxy coor-x coor-y set color 17 set size 0.5
+        set done? true
+      ]
+    ]
+  ]
+  ask africans [
+    let coor-x random-xcor
+    let coor-y random-ycor
+    let done? false
+    while [not done?]
+    [
+      ifelse ([pcolor] of patch coor-x coor-y = black) [
+        set coor-x random-xcor
+        set coor-y random-ycor
+      ][
+        setxy coor-x coor-y set color 108 set size 0.5
+        set done? true
+      ]
+    ]
+  ]
+
 end
-
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 227
@@ -164,10 +202,10 @@ NIL
 0
 
 MONITOR
-20
-85
-199
-130
+22
+409
+201
+454
 Turtles alive
 count turtles
 17
@@ -219,6 +257,21 @@ energy-from-grass
 100
 16.0
 1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+20
+98
+198
+131
+speed
+speed
+0
+1
+0.2
+.1
 1
 NIL
 HORIZONTAL
