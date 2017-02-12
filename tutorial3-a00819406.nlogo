@@ -26,35 +26,40 @@ to move-turtles
 
   ask africans with [player = 1]
     [
-      let done? false
-      ;while [not done?]
-      ;[
-        ;if (any? (patches in-cone 3 60) with [pcolor = black])[
-         ; rt -10
 
-
-        ;]
-        ;[
-          ifelse (not (patch-here = patch target-x target-y))
-          [ facexy target-x target-y
-            fd speed][
-            set finish 1
-            set done? true
-            ]
-        if (finish = 1) [
-          set finish 0
-          ask asians with [player = 1 ] [
-            set player 0
-          ]
-          ;Tengo que ver quien no ha llegado y matarla
-          ;cambiar el player que tenia 1 a 0 (identificar la tortuga, con el with) el with filtra dentro de un agentset
-          ;una vez que ya se cual llego y ya mate a la otra y ya se reseteo el player 0
-          ;cambiar el punto y seleccionar los nuevos jugadores
-          ;ask one-of asians [set player 1]
-          ;ask one-of africans [set player 1]
+      ifelse (not (patch-here = patch target-x target-y))
+      [
+        ifelse (any? (patches in-cone 5 30) with [pcolor = black]) [
+          rt -50
+          fd speed
         ]
+        [
+          facexy target-x target-y
+          fd speed
+
+        ]
+        ]
+      [
+        set finish 1
+       ]
+      ;if (any? (patches in-cone 3 60) with [pcolor = black])[
+
+
+
+
+
+      ;if (finish = 1) [
+      ; set finish 0
+      ;ask asians with [player = 1 ] [
+      ;  set player 0
+      ;]
+      ;Tengo que ver quien no ha llegado y matarla
+      ;cambiar el player que tenia 1 a 0 (identificar la tortuga, con el with) el with filtra dentro de un agentset
+      ;una vez que ya se cual llego y ya mate a la otra y ya se reseteo el player 0
+      ;cambiar el punto y seleccionar los nuevos jugadores
+      ;ask one-of asians [set player 1]
+      ;ask one-of africans [set player 1]
         ;]
-       ; ]
     ]
 
 
@@ -107,6 +112,7 @@ to setup-turtles
   set-default-shape africans "ant"
   set-default-shape asians "ant 2"
 
+  ;;Rojo
   ask asians [
     let coor-x random-xcor
     let coor-y random-ycor
@@ -117,11 +123,13 @@ to setup-turtles
         set coor-x random-xcor
         set coor-y random-ycor
       ][
-        setxy coor-x coor-y set color 17 set size 0.5
+        setxy coor-x coor-y set color 14 set size 0.5
         set done? true
       ]
     ]
   ]
+
+  ;;Azul
   ask africans [
     let coor-x random-xcor
     let coor-y random-ycor
@@ -132,7 +140,7 @@ to setup-turtles
         set coor-x random-xcor
         set coor-y random-ycor
       ][
-        setxy coor-x coor-y set color 108 set size 0.5
+        setxy coor-x coor-y set color 105 set size 0.5
         set done? true
       ]
     ]
@@ -228,8 +236,8 @@ true
 true
 "" ""
 PENS
-"Asians" 1.0 0 -1604481 true "" "plot count asians"
-"Africans" 1.0 0 -5325092 true "" "plot count africans"
+"Asians" 1.0 0 -5298144 true "" "plot count asians"
+"Africans" 1.0 0 -13345367 true "" "plot count africans"
 
 SLIDER
 19
@@ -270,7 +278,7 @@ speed
 speed
 0
 1
-0.2
+0.1
 .1
 1
 NIL
