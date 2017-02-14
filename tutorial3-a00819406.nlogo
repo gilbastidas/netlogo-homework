@@ -1,121 +1,169 @@
+;Breed to be used as turtles for the example.
 breed[asians asian]
 breed[africans african]
 
+;This allows to choose the specific turtles of each breed that will move.
 asians-own [player]
 africans-own [player]
-globals [
-  target-x target-y finish
-];location of center of circle
 
-turtles-own [energy]
+;Global variables.
+globals [
+  target-x target-y   ;Location of the center of the target.
+  finish              ;Condition to finish the program.
+]
 
 to go
-  move-turtles
+  move-turtles           ;Procedure that allows the turtles to move toward the target.
+  if finish = 1 [stop]   ;Condition to finish the program (finish = 1).
   tick
 end
 
 to move-turtles
-  ask asians with [player = 1]
+
+  let done? false        ;Condition is true when a turtle has reached the target.
+
+  ask asians with [player = 1]   ;Only asian turtle designated as player 1 will move.
     [
-      ifelse (not (patch-here = patch target-x target-y))
-      [ facexy target-x target-y
-        fd speed][
-        set finish 1
+      let ready? false           ;Condition to know if there is no obstacle on front of the turtle.
+
+      ifelse (not (patch-here = patch target-x target-y)) ;Check if turtle is not on the target.
+      [ ifelse (patch-ahead speed = nobody)or([pcolor] of patch-ahead speed = black)
+        [ifelse (patch-left-and-ahead 90 speed = nobody)or([pcolor] of patch-left-and-ahead 90 speed = black)    ;Logic required to avoid obstacles
+          [while [not ready?]                                                                                    ;around the turtle and between it
+            [right 1                                                                                             ;and the target.
+              if (not((patch-ahead speed = nobody)or([pcolor] of patch-ahead speed = black)))
+              [set ready? true]]]
+          [while [not ready?]
+            [left 1
+              if (not((patch-ahead speed = nobody)or([pcolor] of patch-ahead speed = black)))
+              [set ready? true]]]]
+        [if (not((patch-left-and-ahead 90 speed = nobody)or([pcolor] of patch-left-and-ahead 90 speed = black)))
+          and(not((patch-right-and-ahead 90 speed = nobody)or([pcolor] of patch-right-and-ahead 90 speed = black)))
+          [facexy target-x target-y]
+          ]                                               ;If it hasn't arrived, it moves towards
+        fd speed][                                        ;the target at the designated speed.
+        ask asians with [player = 1] [set player 0]       ;If the turtle is on the target, the winner will not keep moving
+        ask africans with [player = 1] [die]              ;and the loser dies.
+        set done? true                                    ;The done condition becomes true.
         ]
     ]
 
-  ask africans with [player = 1]
+  ask africans with [player = 1] ;Only african turtle designated as player 1 will move.
     [
+      let ready? false           ;Condition to know if there is no obstacle on front of the turtle.
 
-      ifelse (not (patch-here = patch target-x target-y))
-      [
-        ifelse (any? (patches in-cone 5 30) with [pcolor = black]) [
-          rt -50
-          fd speed
-        ]
-        [
-          facexy target-x target-y
-          fd speed
-
-        ]
-        ]
-      [
-        set finish 1
-       ]
-      ;if (any? (patches in-cone 3 60) with [pcolor = black])[
-
-
-
-
-
-      ;if (finish = 1) [
-      ; set finish 0
-      ;ask asians with [player = 1 ] [
-      ;  set player 0
-      ;]
-      ;Tengo que ver quien no ha llegado y matarla
-      ;cambiar el player que tenia 1 a 0 (identificar la tortuga, con el with) el with filtra dentro de un agentset
-      ;una vez que ya se cual llego y ya mate a la otra y ya se reseteo el player 0
-      ;cambiar el punto y seleccionar los nuevos jugadores
-      ;ask one-of asians [set player 1]
-      ;ask one-of africans [set player 1]
-        ;]
+      ifelse (not (patch-here = patch target-x target-y)) ;Check if turtle is not on the target.
+      [ ifelse (patch-ahead speed = nobody)or([pcolor] of patch-ahead speed = black)
+        [ifelse (patch-left-and-ahead 90 speed = nobody)or([pcolor] of patch-left-and-ahead 90 speed = black)    ;Logic required to avoid obstacles
+          [while [not ready?]                                                                                    ;around the turtle and between it
+            [right 1                                                                                             ;and the target.
+              if (not((patch-ahead speed = nobody)or([pcolor] of patch-ahead speed = black)))
+              [set ready? true]]]
+          [while [not ready?]
+            [left 1
+              if (not((patch-ahead speed = nobody)or([pcolor] of patch-ahead speed = black)))
+              [set ready? true]]]]
+        [if (not((patch-left-and-ahead 90 speed = nobody)or([pcolor] of patch-left-and-ahead 90 speed = black)))
+          and(not((patch-right-and-ahead 90 speed = nobody)or([pcolor] of patch-right-and-ahead 90 speed = black)))
+          [facexy target-x target-y]
+          ]                                               ;If it hasn't arrived, it moves towards
+        fd speed][                                        ;the target at the designated speed.
+        ask africans with [player = 1] [set player 0]     ;If the turtle is on the target, the winner will not keep moving
+        ask asians with [player = 1] [die]                ;and the loser dies
+        set done? true                                    ;The done condition becomes true.
+         ]
     ]
 
+   if done?               ;If a turtle has reached the target, the following ocurrs:
+   [clear-target          ;The current target is cleared.
+    if not any? asians    ;It there are no more asian turtles,
+    [set finish 1         ;the finish condition becomes 1
+     stop]                ;and the movement ends.
+    if not any? africans  ;It there are no more african turtles,
+    [set finish 1         ;the finish condition becomes 1
+     stop]                ;and the movement ends.
+    set-player1           ;It the program hasn't ended, a new couple of turtles is selected
+    setup-target          ;and a new target appears on the map.
+   ]
 
-
-  ;puedo checar si finish para contar las tortugas y terminar el juego count asians o similar si alguno es 0 termino
 end
-
 
 to setup
   clear-all
-  setup-patches
-  setup-target
-  setup-turtles
-  ask one-of asians [set player 1]
-  ask one-of africans [set player 1]
-  set finish 0
+  setup-patches   ;Patches and obstacles are prepared.
+  setup-target    ;The first target is created.
+  setup-turtles   ;Both breeds of turtles spawn.
+  set-player1     ;The first turtles to move are chosen.
+  set finish 0    ;The finish condition is set to 0.
   reset-ticks
 end
 
 to setup-patches
-  ask patches [set pcolor 67]
-  ask patch 5 3 [set pcolor black]
-  ask patch -5 -3 [set pcolor black]
-  ask patches with [pcolor = black] [ ask patch-at -1 1 [ set pcolor black ] ask patch-at 0 1 [ set pcolor black ] ask patch-at -1 0 [ set pcolor black ]]
+  ask patches [set pcolor 67]                ;Set green color for patches.
+  ask patch 5 2 [set pcolor black]           ;Set first black patch for obstacle 1.
+  ask patch -2 -5 [set pcolor black]         ;Set first black patch for obstacle 2.
+  ask patches with [pcolor = black]          ;Patches are turned black until two 4x4 squares are created.
+  [ ask patch-at -1 0 [ set pcolor black ]
+    ask patch-at -2 0 [ set pcolor black ]
+    ask patch-at -3 0 [ set pcolor black ]
+    ask patch-at 0 1 [ set pcolor black ]
+    ask patch-at -1 1 [ set pcolor black ]
+    ask patch-at -2 1 [ set pcolor black ]
+    ask patch-at -3 1 [ set pcolor black ]
+    ask patch-at 0 2 [ set pcolor black ]
+    ask patch-at -1 2 [ set pcolor black ]
+    ask patch-at -2 2 [ set pcolor black ]
+    ask patch-at -3 2 [ set pcolor black ]
+    ask patch-at 0 3 [ set pcolor black ]
+    ask patch-at -1 3 [ set pcolor black ]
+    ask patch-at -2 3 [ set pcolor black ]
+    ask patch-at -3 3 [ set pcolor black ]]
+end
+
+to set-player1
+  ask one-of africans [set player 1]   ;One turtle from the african breed is chosen to move.
+  ask one-of asians [set player 1]     ;One turtle from the asian breed is chosen to move.
 end
 
 to setup-target
-  set target-x random-xcor
-  set target-y random-ycor
-  ask patch target-x target-y [
-    if pcolor = black [
-      setup-target
-    ]
-    ; draw the target in red by stamping a circular
-    ask patch target-x target-y[
-      sprout 1 [
-        set color 14
-        set shape "circle"
-        set size 1
-        stamp
-        die
+  set target-x random-xcor        ;Generates a random coordinate in X for target.
+  set target-y random-ycor        ;Generates a random coordinate in Y for target.
+  ask patch target-x target-y [   ;Checks if the patch at the designated
+    ifelse pcolor = black [       ;coordinates is an obstacle.
+      setup-target]               ;If it is an obstacles, it calls the procedure again.
+    [ask patch target-x target-y[ ;If it is not an obstacle:
+      sprout 1 [                  ;A turtle is created.
+        set color 14              ;The turtle's color is set to red.
+        set shape "circle"        ;The turtle's shape is set to a circle.
+        set size 1                ;The turtle's size is set to 1.
+        stamp                     ;The turtle stamps its color on the patch.
+        die                       ;The turtle is killed.
       ]
+     ]
     ]
   ]
 end
 
-to setup-turtles
-  create-africans number
-  create-asians number
-  set-default-shape africans "ant"
-  set-default-shape asians "ant 2"
+to clear-target
+  ask patch target-x target-y[   ;At the coordinates of the current target:
+      sprout 1 [                 ;A turtle is created.
+        set shape "circle"       ;The turtle's shape is set to a circle.
+        set size 1.1             ;The turtle's size is set to 1.1, a bit bigger than the original stamp.
+        stamp-erase              ;The stamp is erased.
+        die                      ;The turtle is killed.
+      ]
+    ]
+end
 
-  ;;Rojo
+to setup-turtles
+  create-africans number             ;Create as many african turtles as the amount designated on the slider.
+  create-asians number               ;Create as many asian turtles as the amount designated on the slider.
+  set-default-shape africans "ant"   ;Set the shape of the african turtles to ants.
+  set-default-shape asians "ant"     ;Set the shape of the asian turtles to ants.
+
   ask asians [
-    let coor-x random-xcor
-    let coor-y random-ycor
+    let coor-x random-xcor       ;Set all the asian turtles on random places of the map,
+    let coor-y random-ycor       ;checking that no one is over an obstacle.
     let done? false
     while [not done?]
     [
@@ -123,16 +171,14 @@ to setup-turtles
         set coor-x random-xcor
         set coor-y random-ycor
       ][
-        setxy coor-x coor-y set color 14 set size 0.5
+        setxy coor-x coor-y set color 44 set size 0.5   ;Color of asian turtles is set yellow.
         set done? true
       ]
     ]
   ]
-
-  ;;Azul
   ask africans [
-    let coor-x random-xcor
-    let coor-y random-ycor
+    let coor-x random-xcor       ;Set all the african turtles on random places of the map,
+    let coor-y random-ycor       ;checking that no one is over an obstacle.
     let done? false
     while [not done?]
     [
@@ -140,7 +186,7 @@ to setup-turtles
         set coor-x random-xcor
         set coor-y random-ycor
       ][
-        setxy coor-x coor-y set color 105 set size 0.5
+        setxy coor-x coor-y set color 103 set size 0.5   ;Color of african turtles is set blue.
         set done? true
       ]
     ]
@@ -151,10 +197,10 @@ end
 GRAPHICS-WINDOW
 227
 39
-711
-524
--1
--1
+713
+546
+8
+8
 28.0
 1
 10
@@ -236,8 +282,8 @@ true
 true
 "" ""
 PENS
-"Asians" 1.0 0 -5298144 true "" "plot count asians"
-"Africans" 1.0 0 -13345367 true "" "plot count africans"
+"Asians" 1.0 0 -1604481 true "" "plot count asians"
+"Africans" 1.0 0 -5325092 true "" "plot count africans"
 
 SLIDER
 19
@@ -248,22 +294,7 @@ number
 number
 0
 100
-7.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-20
-197
-199
-230
-energy-from-grass
-energy-from-grass
-0
-100
-16.0
+10
 1
 1
 NIL
@@ -286,40 +317,29 @@ HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
-
-(a general understanding of what the model is trying to show or explain)
+A simulation of a competition between two kinds of turtle to reach a target in the environment.
 
 ## HOW IT WORKS
 
-(what rules the agents use to create the overall behavior of the model)
+We will have two kinds of turtles, “african” and “asian”. They are created in equal number, where this number is regulated by a the slider number.
+When the simulation starts, a “target” point will be created and shown at the world as a big red dot at a random location, and at this moment one african and one asian turtle are randomly selected.
+They should approach the target at a uniform and predetermined speed (the same for the two turtles), and when the first one of them reaches the dot, the other one is killed. Then, the target disappears and another target is created, another african and asian turtles are selected, etc.
+
+The simulation finishes when there are no african or no asian turtles.
+
+There will also be two square obstacles, painted as 4 x 4 solid black squares, put in the world before creating the turtles, because no turtle should be created above them. Also, when roaming around the turtles are not allowed to step over the obstacles, which are supposed to be solid.
 
 ## HOW TO USE IT
 
-(how to use the model, including a description of each of the items in the Interface tab)
-
-## THINGS TO NOTICE
-
-(suggested things for the user to notice while running the model)
-
-## THINGS TO TRY
-
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+Speed: (slider) to change the velocity of the turtles.
+Number: (slider) is the number of each kind of turtle.
 
 ## EXTENDING THE MODEL
+We could add some labels to show the winner and the quantity of turtles left after the competition.
 
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
-
-## NETLOGO FEATURES
-
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
-
-## RELATED MODELS
-
-(models in the NetLogo Models Library and elsewhere which are of related interest)
 
 ## CREDITS AND REFERENCES
-
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+Created by Gilberto Ayala and Ernesto Vega
 @#$#@#$#@
 default
 true
@@ -653,8 +673,9 @@ false
 0
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
+
 @#$#@#$#@
-NetLogo 6.0
+NetLogo 5.3.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -670,6 +691,7 @@ true
 0
 Line -7500403 true 150 150 90 180
 Line -7500403 true 150 150 210 180
+
 @#$#@#$#@
 0
 @#$#@#$#@
